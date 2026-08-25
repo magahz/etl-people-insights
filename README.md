@@ -6,7 +6,7 @@ ingestão, tratamento e análise de dados de RH — do dado bruto ao insight est
 ## Sobre o projeto
 
 Este projeto replica a arquitetura de um pipeline de dados de Talent Acquisition, 
-construído com base em experiência real de People Analytics. Utiliza duas fontes de 
+construído com base na minha experiência experiência real em People Analytics. Utiliza duas fontes de 
 dados distintas, aplica transformações e normalizações, faz o append das bases e 
 persiste o resultado em banco de dados relacional para análise via SQL.
 
