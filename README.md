@@ -38,15 +38,38 @@ Fonte 2 (Implantação)   ↗
 - Estado civil influencia retenção independentemente da idade: solteiros têm taxa de 
   desligamento de 26%, mais que o dobro de casados (12%) e divorciados (10%)
 
-## Principais insights — Modelo Preditivo (Random Forest)
+## Análise Preditiva — Predição de Risco de Desligamento
 
-- Acurácia: 83%
+Modelo de classificação (Random Forest) treinado para prever quais funcionários 
+têm maior probabilidade de se desligar, com base em variáveis de perfil e histórico 
+profissional.
+
+**Limitação do dataset:** a variável Attrition não distingue desligamento voluntário 
+de involuntário. Os insights devem ser interpretados como fatores associados ao 
+desligamento em geral.
+
+- Acurácia geral: 82%
+- Salário é o fator de maior importância preditiva (33%), seguido de idade (24%) e tempo no cargo (16%)
+- Perfil de maior risco: jovem + pouco tempo de casa + salário abaixo da média
+
+**Teste de Hipótese 1 — Salário, Idade e Tempo no Cargo:**
 - Quem sai ganha em média 30% menos do que quem fica (R$4.780 vs R$6.835)
 - Quem sai é 4 anos mais jovem em média (33.6 vs 37.5 anos)
 - Quem sai tem 35% menos tempo no cargo (2.9 vs 4.5 anos)
-- Perfil de maior risco: jovem + pouco tempo de casa + salário abaixo da média
-- Salário é o fator de maior importância preditiva (38%), seguido de idade (25%) 
-  e tempo no cargo (14%)
+
+**Teste de Hipótese 2 — Estado Civil:**
+- Solteiros têm taxa de desligamento de 26%, mais que o dobro de casados (12%) e divorciados (10%)
+- A diferença de idade entre os grupos é pequena (35 vs 38 anos), sugerindo que 
+  estado civil tem influência própria além de ser proxy de idade
+
+**Nota técnica:** o dataset apresenta desbalanceamento de classes (~84% não desligados 
+vs ~16% desligados). O Recall da classe minoritária (desligados) ficou em 5%, indicando 
+que o modelo é conservador na identificação de quem vai sair. Os insights foram 
+complementados com análise exploratória e testes de hipótese para maior robustez.
+
+## Próximos Passos
+- Incluir variáveis de satisfação (WorkLifeBalance, JobSatisfaction) na análise preditiva
+- Explorar técnicas de balanceamento de classes (SMOTE) para melhorar o Recall
 
 ## Stack
 
