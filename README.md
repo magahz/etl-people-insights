@@ -6,7 +6,7 @@ ingestão, tratamento e análise de dados de RH — do dado bruto ao insight est
 ## Sobre o projeto
 
 Este projeto replica a arquitetura de um pipeline de dados de Talent Acquisition, 
-construído com base na minha experiência experiência real em People Analytics. Utiliza duas fontes de 
+construído na minha experiência experiência real em People Analytics. Utiliza duas fontes de 
 dados distintas, aplica transformações e normalizações, faz o append das bases e 
 persiste o resultado em banco de dados relacional para análise via SQL.
 
@@ -24,13 +24,13 @@ Fonte 2 (Implantação)   ↗
 - Faixa etária e tempo no cargo: criação de variáveis categóricas para segmentação
 - Append de fontes: união de duas bases com estruturas diferentes
 - Persistência: salvamento em banco SQLite
-- Análise SQL: queries para extração de insights de rotatividade, elegibilidade e perfil
+- Análise SQL: queries para extração de insights de rotatividade e perfil
 
 ## Principais insights
 
 - Funcionários com até 25 anos têm taxa de desligamento de 35.8% — o triplo da faixa 36-45
 - Cargos técnicos e de RH concentram as maiores taxas de rotatividade (~24%)
-- Funcionários elegíveis (6+ meses no cargo) ganham 60% mais e saem menos
+- Funcionários com 6+ meses no cargo ganham 60% mais e saem menos
 - Liderança tem a menor taxa de desligamento: 5.2%
 
 ## Stack
