@@ -42,7 +42,7 @@ Python · Pandas · SQLite · SQL
 Projeto desenvolvido como portfólio, baseado em pipeline real criado e mantido por mim 
 na área de People Analytics de uma multinacional de grande porte. O pipeline original 
 integra APIs REST do Workday, múltiplas fontes de dados e automações, suportando uma 
-operação de Talent Acquisition com mais de 1.100 contratações anuais.
+operação de Talent Acquisition com mais de 2.000 contratações anuais.
 
 Este repositório replica a arquitetura e a lógica de tratamento usando dados públicos 
 (IBM HR Analytics Dataset) para fins de demonstração.
