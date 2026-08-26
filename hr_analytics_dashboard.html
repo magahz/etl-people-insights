@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>HR Analytics — Attrition Insights</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:      #0b1623;
+  --surface: #0f2030;
+  --border:  #162840;
+  --teal:    #25E2CC;
+  --red:     #e05c5c;
+  --green:   #3ecf8e;
+  --blue:    #5b9cf6;
+  --muted:   #2a4055;
+  --text:    #8fa8be;
+  --heading: #dce8f0;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ── PAGE ── */
+.page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 32px 36px 48px;
+}
+
+/* ── HEADER ── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 20px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--border);
+}
+.header h1 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--heading);
+  letter-spacing: -0.01em;
+}
+.header p {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.badge {
+  text-align: right;
+}
+.badge-label {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.badge-val {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--teal);
+  margin-top: 2px;
+}
+
+/* ── SECTION ── */
+.section-head {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+/* ── KPI STRIP ── */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.kpi-name {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.kpi-name::before {
+  content: '';
+  display: block;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.kpi.red   .kpi-name::before { background: var(--red); }
+.kpi.teal  .kpi-name::before { background: var(--teal); }
+.kpi.green .kpi-name::before { background: var(--teal); }
+.kpi-num {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.kpi.red   .kpi-num { color: var(--red); }
+.kpi.teal  .kpi-num { color: var(--teal); }
+.kpi.green .kpi-num { color: var(--teal); }
+.kpi-hint {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 5px;
+}
+
+/* ── CHARTS ROW ── */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.card-title {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.chart-box { height: 200px; position: relative; }
+
+/* ── COMPARE ROW ── */
+.compare-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.cmp-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.cmp-label {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.cmp-vals {
+  display: flex;
+  justify-content: space-between;
+}
+.cmp-val { text-align: center; }
+.cmp-num {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+.cmp-num.s { color: var(--teal); }
+.cmp-num.l { color: var(--red); }
+.cmp-cap {
+  font-size: 9px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.cmp-track {
+  height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+.cmp-fill {
+  height: 100%;
+  background: var(--teal);
+  border-radius: 2px;
+}
+
+/* ── BOTTOM ROW ── */
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 10px;
+}
+
+/* ── INSIGHTS ── */
+.insight-list { display: flex; flex-direction: column; gap: 8px; }
+.insight {
+  display: flex;
+  gap: 12px;
+  background: #091521;
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--teal);
+  border-radius: 8px;
+  padding: 11px 13px;
+}
+.ins-n {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  flex-shrink: 0;
+  width: 20px;
+  line-height: 1.2;
+}
+.ins-t {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--heading);
+  margin-bottom: 2px;
+}
+.ins-d {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* ── FOOTER ── */
+.footer {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.footer-txt { font-size: 9px; color: var(--border); }
+.tag-row { display: flex; gap: 6px; }
+.tag {
+  font-size: 9px;
+  padding: 3px 9px;
+  background: #091521;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--muted);
+}
+
+body.light {
+  --bg:      #f4f7fa;
+  --surface: #ffffff;
+  --border:  #e2e8f0;
+  --teal:    #007380;
+  --red:     #c0392b;
+  --green:   #1a9e6e;
+  --blue:    #2563eb;
+  --muted:   #64748b;
+  --text:    #374151;
+  --heading: #0f172a;
+}
+body.light .badge-val { color: var(--teal); }
+body.light .insight { background: #f8fafc; border-color: #e2e8f0; }
+body.light .footer-txt { color: #cbd5e1; }
+
+.theme-toggle {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text);
+  transition: all 0.2s;
+  line-height: 1;
+}
+.theme-toggle:hover { border-color: var(--teal); }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <h1>HR Analytics — Attrition Insights</h1>
+      <p>Análise exploratória e preditiva de desligamento · IBM HR Analytics Dataset</p>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:12px"><button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Alternar modo">☀️</button><div class="badge">
+      <div class="badge-label">Funcionários analisados</div>
+      <div class="badge-val">1.475</div>
+    </div>
+  </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="section-head">Visão Geral</div>
+  <div class="kpi-strip">
+    <div class="kpi red">
+      <div class="kpi-name">Taxa de Desligamento</div>
+      <div class="kpi-num">16,1%</div>
+      <div class="kpi-hint">238 desligamentos registrados</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-name">Maior Risco — Faixa Etária</div>
+      <div class="kpi-num">18–25</div>
+      <div class="kpi-hint">35,8% de taxa de desligamento</div>
+    </div>
+    <div class="kpi teal">
+      <div class="kpi-name">Maior Risco — Cargo</div>
+      <div class="kpi-num">Técnico</div>
+      <div class="kpi-hint">24,2% de taxa de desligamento</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-name">Menor Risco — Cargo</div>
+      <div class="kpi-num">Liderança</div>
+      <div class="kpi-hint">5,2% de taxa de desligamento</div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="section-head">Análise de Desligamento</div>
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-title">Por Faixa Etária</div>
+      <div class="chart-box"><canvas id="cIdade"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Por Tipo de Cargo</div>
+      <div class="chart-box"><canvas id="cCargo"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Por Estado Civil</div>
+      <div class="chart-box"><canvas id="cCivil"></canvas></div>
+    </div>
+  </div>
+
+  <!-- COMPARE -->
+  <div class="section-head">Perfil Comparativo — Ficaram vs Saíram</div>
+  <div class="compare-row">
+    <div class="cmp-card">
+      <div class="cmp-label">Salário Médio</div>
+      <div class="cmp-vals">
+        <div class="cmp-val"><div class="cmp-num s">R$6.835</div><div class="cmp-cap">Ficaram</div></div>
+        <div class="cmp-val"><div class="cmp-num l">R$4.780</div><div class="cmp-cap">Saíram</div></div>
+      </div>
+      <div class="cmp-track"><div class="cmp-fill" style="width:70%"></div></div>
+    </div>
+    <div class="cmp-card">
+      <div class="cmp-label">Idade Média</div>
+      <div class="cmp-vals">
+        <div class="cmp-val"><div class="cmp-num s">37,6</div><div class="cmp-cap">Ficaram</div></div>
+        <div class="cmp-val"><div class="cmp-num l">33,6</div><div class="cmp-cap">Saíram</div></div>
+      </div>
+      <div class="cmp-track"><div class="cmp-fill" style="width:55%"></div></div>
+    </div>
+    <div class="cmp-card">
+      <div class="cmp-label">Anos no Cargo</div>
+      <div class="cmp-vals">
+        <div class="cmp-val"><div class="cmp-num s">4,5</div><div class="cmp-cap">Ficaram</div></div>
+        <div class="cmp-val"><div class="cmp-num l">2,9</div><div class="cmp-cap">Saíram</div></div>
+      </div>
+      <div class="cmp-track"><div class="cmp-fill" style="width:40%"></div></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM -->
+  <div class="section-head">Variáveis Preditivas & Principais Insights</div>
+  <div class="bottom-row">
+    <div class="card">
+      <div class="card-title">Importância das Variáveis — Random Forest (acurácia 82%)</div>
+      <div class="chart-box" style="height:250px"><canvas id="cImport"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Principais Insights</div>
+      <div class="insight-list">
+        <div class="insight">
+          <div class="ins-n">01</div>
+          <div>
+            <div class="ins-t">Salário está diretamente associado à saída</div>
+            <div class="ins-d">Quem sai ganha 30% menos. Cargos técnicos e comerciais merecem atenção prioritária em revisões salariais.</div>
+          </div>
+        </div>
+        <div class="insight">
+          <div class="ins-n">02</div>
+          <div>
+            <div class="ins-t">Jovens são o grupo mais vulnerável</div>
+            <div class="ins-d">18–25 anos têm taxa de 35,8%. Plano de carreira e progressão visível são fatores críticos de retenção.</div>
+          </div>
+        </div>
+        <div class="insight">
+          <div class="ins-n">03</div>
+          <div>
+            <div class="ins-t">Estado civil revela padrão de estabilidade</div>
+            <div class="ins-d">Solteiros saem o dobro de casados (26% vs 12%), independente da diferença de idade entre os grupos.</div>
+          </div>
+        </div>
+        <div class="insight">
+          <div class="ins-n">04</div>
+          <div>
+            <div class="ins-t">Liderança retém melhor</div>
+            <div class="ins-d">5,2% de desligamento contra 24% em cargos técnicos. Entender o que funciona e replicar é estratégico.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-txt">IBM HR Analytics Dataset · Kaggle (público) · Portfólio baseado em pipeline real de People Analytics</div>
+    <div class="tag-row">
+      <span class="tag">Python</span>
+      <span class="tag">Pandas</span>
+      <span class="tag">Scikit-learn</span>
+      <span class="tag">SQLite</span>
+      <span class="tag">SQL</span>
+    </div>
+  </div>
+
+</div>
+<script>
+const G = 'rgba(255,255,255,0.04)'
+const T = { color: '#2a4055', font: { size: 10 } }
+const base = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { color: G }, ticks: T, border: { display: false } },
+    y: { grid: { color: G }, ticks: T, border: { display: false } }
+  }
+}
+
+// Faixa etária
+new Chart(document.getElementById('cIdade'), {
+  type: 'bar',
+  data: {
+    labels: ['18–25','26–35','36–45','45+'],
+    datasets: [{
+      data: [35.8, 19.2, 9.1, 12.5],
+      backgroundColor: ['#e05c5c','rgba(37,226,204,0.5)','rgba(37,226,204,0.75)','#25E2CC'],
+      borderRadius: 5, borderSkipped: false
+    }]
+  },
+  options: { ...base,
+    scales: { ...base.scales,
+      y: { ...base.scales.y, ticks: { ...T, callback: v => v+'%' } }
+    }
+  }
+})
+
+// Por cargo
+new Chart(document.getElementById('cCargo'), {
+  type: 'bar',
+  data: {
+    labels: ['Técnico','RH','Comercial','Pesquisa','Saúde','Liderança'],
+    datasets: [{
+      data: [24.2, 22.6, 22.0, 16.1, 6.9, 5.2],
+      backgroundColor: v => v.raw > 20 ? '#e05c5c' : '#25E2CC',
+      borderRadius: 4, borderSkipped: false
+    }]
+  },
+  options: { ...base, indexAxis: 'y',
+    scales: { ...base.scales,
+      x: { ...base.scales.x, ticks: { ...T, callback: v => v+'%' } }
+    }
+  }
+})
+
+// Estado civil
+new Chart(document.getElementById('cCivil'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Solteiro · 26%','Casado · 12%','Divorciado · 10%'],
+    datasets: [{
+      data: [26, 12, 10],
+      backgroundColor: ['#e05c5c','#25E2CC','rgba(37,226,204,0.4)'],
+      borderWidth: 0,
+      hoverOffset: 6
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '62%',
+    plugins: {
+      legend: {
+        display: true,
+        position: 'bottom',
+        labels: {
+          color: '#2a4055',
+          font: { size: 10 },
+          padding: 14,
+          boxWidth: 8,
+          boxHeight: 8,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
+      }
+    }
+  }
+})
+
+// Importância
+new Chart(document.getElementById('cImport'), {
+  type: 'bar',
+  data: {
+    labels: ['Salário','Idade','Tempo no Cargo','Est. Civil (Solteiro)','Est. Civil (Divorciado)','Cargo (Liderança)'],
+    datasets: [{
+      data: [33.3, 24.2, 15.6, 5.4, 3.4, 3.0],
+      backgroundColor: ['#25E2CC','rgba(37,226,204,0.85)','rgba(37,226,204,0.65)','rgba(37,226,204,0.4)','rgba(37,226,204,0.3)','rgba(37,226,204,0.2)'],
+      borderRadius: 4, borderSkipped: false
+    }]
+  },
+  options: { ...base, indexAxis: 'y',
+    scales: { ...base.scales,
+      x: { ...base.scales.x, ticks: { ...T, callback: v => v+'%' } }
+    }
+  }
+})
+</script>
+
+<script>
+function toggleTheme() {
+  const body = document.body;
+  const btn = document.getElementById('themeBtn');
+  body.classList.toggle('light');
+  btn.textContent = body.classList.contains('light') ? '🌙' : '☀️';
+  
+  // Update chart colors for light mode
+  const isLight = body.classList.contains('light');
+  const gridColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)';
+  const tickColor = isLight ? '#94a3b8' : '#2a4055';
+  
+  Chart.instances && Object.values(Chart.instances).forEach(chart => {
+    if (chart.options.scales) {
+      ['x','y'].forEach(axis => {
+        if (chart.options.scales[axis]) {
+          chart.options.scales[axis].grid.color = gridColor;
+          chart.options.scales[axis].ticks.color = tickColor;
+        }
+      });
+    }
+    if (chart.options.plugins?.legend?.labels) {
+      chart.options.plugins.legend.labels.color = tickColor;
+    }
+    chart.update();
+  });
+}
+</script>
+</body>
+</html>
